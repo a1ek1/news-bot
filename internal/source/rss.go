@@ -14,7 +14,7 @@ type RSSSource struct {
 	SourceName string
 }
 
-func NewRSSSource(s model.Source) RSSSource {
+func NewRSSourceFromModel(s model.Source) RSSSource {
 	return RSSSource{
 		URL:        s.FeedURL,
 		SourceID:   s.ID,
@@ -62,4 +62,12 @@ func (s RSSSource) loadFeed(ctx context.Context, url string) (*rss.Feed, error) 
 	case feed := <-feedChan:
 		return feed, nil
 	}
+}
+
+func (s RSSSource) ID() int64 {
+	return s.SourceID
+}
+
+func (s RSSSource) Name() string {
+	return s.SourceName
 }
