@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"news-bot/internal/model"
 	"news-bot/internal/utils/markup"
@@ -17,12 +18,13 @@ import (
 
 type ArticleProvider interface {
 	AllNotPosted(ctx context.Context, since time.Time, limit uint64) ([]model.Article, error)
-	MarkPosted(ctx context.Context, id int64) error
+	MarkPosted(ctx context.Context, article model.Article) error
 }
 
 type Summarizer interface {
-	Summarize(ctx context.Context, text string) (string, error)
+	Summarize(text string) (string, error)
 }
+
 type Notifier struct {
 	articles         ArticleProvider
 	summarizer       Summarizer
@@ -50,6 +52,26 @@ func New(
 	}
 }
 
+func (n *Notifier) Start(ctx context.Context) error {
+	ticker := time.NewTicker(n.sendInterval)
+	defer ticker.Stop()
+
+	if err := n.SelectAndSendArticle(ctx); err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case <-ticker.C:
+			if err := n.SelectAndSendArticle(ctx); err != nil {
+				return err
+			}
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+}
+
 func (n *Notifier) SelectAndSendArticle(ctx context.Context) error {
 	topOneArticles, err := n.articles.AllNotPosted(ctx, time.Now().Add(-n.lookupTimeWindow), 1)
 	if err != nil {
@@ -61,19 +83,22 @@ func (n *Notifier) SelectAndSendArticle(ctx context.Context) error {
 	}
 
 	article := topOneArticles[0]
-	summary, err := n.extractSummary(ctx, article)
+
+	summary, err := n.extractSummary(article)
 	if err != nil {
-		return err
+		log.Printf("[ERROR] failed to extract summary: %v", err)
 	}
 
 	if err := n.sendArticle(article, summary); err != nil {
 		return err
 	}
 
-	return n.articles.MarkPosted(ctx, article.ID)
+	return n.articles.MarkPosted(ctx, article)
 }
 
-func (n *Notifier) extractSummary(ctx context.Context, article model.Article) (string, error) {
+var redundantNewLines = regexp.MustCompile(`\n{3,}`)
+
+func (n *Notifier) extractSummary(article model.Article) (string, error) {
 	var r io.Reader
 
 	if article.Summary != "" {
@@ -93,7 +118,7 @@ func (n *Notifier) extractSummary(ctx context.Context, article model.Article) (s
 		return "", err
 	}
 
-	summary, err := n.summarizer.Summarize(ctx, cleanText(doc.TextContent))
+	summary, err := n.summarizer.Summarize(cleanupText(doc.TextContent))
 	if err != nil {
 		return "", err
 	}
@@ -101,9 +126,7 @@ func (n *Notifier) extractSummary(ctx context.Context, article model.Article) (s
 	return "\n\n" + summary, nil
 }
 
-var redundantNewLines = regexp.MustCompile(`\n{3,}`)
-
-func cleanText(text string) string {
+func cleanupText(text string) string {
 	return redundantNewLines.ReplaceAllString(text, "\n")
 }
 
