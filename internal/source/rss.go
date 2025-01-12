@@ -2,10 +2,11 @@ package source
 
 import (
 	"context"
-	"news-bot/internal/model"
-
 	"github.com/SlyMarbo/rss"
 	"github.com/samber/lo"
+	"strings"
+
+	"news-bot/internal/model"
 )
 
 type RSSSource struct {
@@ -14,7 +15,7 @@ type RSSSource struct {
 	SourceName string
 }
 
-func NewRSSourceFromModel(s model.Source) RSSSource {
+func NewRSSSourceFromModel(s model.Source) RSSSource {
 	return RSSSource{
 		URL:        s.FeedURL,
 		SourceID:   s.ID,
@@ -34,7 +35,7 @@ func (s RSSSource) Fetch(ctx context.Context) ([]model.Item, error) {
 			Categories: item.Categories,
 			Link:       item.Link,
 			Date:       item.Date,
-			Summary:    item.Summary,
+			Summary:    strings.TrimSpace(item.Summary),
 			SourceName: s.SourceName,
 		}
 	}), nil
