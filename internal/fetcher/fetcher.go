@@ -70,7 +70,7 @@ func (f *Fetcher) Start(ctx context.Context) error {
 func (f *Fetcher) Fetch(ctx context.Context) error {
 	sources, err := f.sources.Sources(ctx)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	var wg sync.WaitGroup
@@ -78,7 +78,7 @@ func (f *Fetcher) Fetch(ctx context.Context) error {
 	for _, src := range sources {
 		wg.Add(1)
 
-		rssSource := source.NewRSSourceFromModel(src)
+		rssSource := source.NewRSSSourceFromModel(src)
 		go func(source Source) {
 			defer wg.Done()
 
@@ -102,7 +102,7 @@ func (f *Fetcher) Fetch(ctx context.Context) error {
 
 func (f *Fetcher) processItems(ctx context.Context, source Source, items []model.Item) error {
 	for _, item := range items {
-		item.Date = time.Now().UTC()
+		item.Date = item.Date.UTC()
 
 		if f.itemShouldBeSkipped(item) {
 			log.Printf("skipped item: %v", item)
