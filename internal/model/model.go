@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Item описывает статью как элемент ленты
 type Item struct {
 	Title      string
 	Categories []string
@@ -13,6 +14,7 @@ type Item struct {
 	SourceName string
 }
 
+// Source описывает источник в формате базы данных
 type Source struct {
 	ID        int64
 	Name      string
@@ -20,6 +22,7 @@ type Source struct {
 	CreatedAt time.Time
 }
 
+// Article описывает статью в формате базы данных
 type Article struct {
 	ID          int64
 	SourceID    int64
