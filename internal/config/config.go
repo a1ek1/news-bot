@@ -19,7 +19,7 @@ type Config struct {
 	AIType               string        `hcl:"ai_type" env:"AI_TYPE"`
 	OpenAIKey            string        `hcl:"openai_key" env:"OPENAI_KEY"`
 	OpenAIModel          string        `hcl:"openai_model" env:"OPENAI_MODEL" default:"gpt-3.5-turbo"`
-	Prompt               string        `hcl:"prompt" env:"PROMPT" default:"Напиши саммари для статьи на русском языке"`
+	Prompt               string        `hcl:"prompt" env:"PROMPT" default:"Напиши очень краткое содержание для статьи на русском языке. Начни со слов Статья посвящена"`
 	YandexKey            string        `hcl:"yandex_key" env:"YANDEX_KEY"`
 }
 
