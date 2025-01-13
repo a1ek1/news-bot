@@ -43,7 +43,7 @@ func (s *YandexSummarizer) Summarize(text string) (string, error) {
 	}
 
 	request := yandexgpt.YandexGPTRequest{
-		ModelURI: yandexgpt.MakeModelURI("b1ge1nci4ej8hlrb58od", yandexgpt.YandexGPTModelLite),
+		ModelURI: yandexgpt.MakeModelURI("b1g64459l652jjcptras", yandexgpt.YandexGPTModelLite),
 		CompletionOptions: yandexgpt.YandexGPTCompletionOptions{
 			Stream:      false,
 			Temperature: 0.7,
