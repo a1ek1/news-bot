@@ -78,7 +78,6 @@ func (s *OpenAISummarizer) Summarize(text string) (string, error) {
 		return rawSummary, nil
 	}
 
-	// cut all after the last ".":
 	sentences := strings.Split(rawSummary, ".")
 
 	return strings.Join(sentences[:len(sentences)-1], ".") + ".", nil
