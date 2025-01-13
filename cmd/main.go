@@ -42,11 +42,12 @@ func main() {
 			config.Get().FetchInterval,
 			config.Get().FilterKeywords,
 		)
-		summarizer = summary.NewOpenAISummarizer(
-			config.Get().OpenAIKey,
-			config.Get().OpenAIModel,
-			config.Get().OpenAIPrompt,
+
+		summarizer = summary.NewYandexSummarizer(
+			config.Get().YandexKey,
+			config.Get().Prompt,
 		)
+
 		notifier = notifier.New(
 			articleStorage,
 			summarizer,

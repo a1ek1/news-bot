@@ -12,6 +12,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/samber/lo v1.47.0
 	github.com/sashabaranov/go-openai v1.36.1
+	github.com/sheeiavellie/go-yandexgpt v1.7.0
 	go.tomakado.io/containers v0.0.0-20240306123358-5f64d4e0f4f3
 )
 
