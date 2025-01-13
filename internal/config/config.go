@@ -16,9 +16,11 @@ type Config struct {
 	FetchInterval        time.Duration `hcl:"fetch_interval" env:"FETCH_INTERVAL" default:"10m"`
 	NotificationInterval time.Duration `hcl:"notification_interval" env:"NOTIFICATION_INTERVAL" default:"1m"`
 	FilterKeywords       []string      `hcl:"filter_keywords" env:"FILTER_KEYWORDS"`
+	AIType               string        `hcl:"ai_type" env:"AI_TYPE"`
 	OpenAIKey            string        `hcl:"openai_key" env:"OPENAI_KEY"`
-	OpenAIPrompt         string        `hcl:"openai_prompt" env:"OPENAI_PROMPT"`
 	OpenAIModel          string        `hcl:"openai_model" env:"OPENAI_MODEL" default:"gpt-3.5-turbo"`
+	Prompt               string        `hcl:"prompt" env:"PROMPT" default:"Напиши саммари для статьи на русском языке"`
+	YandexKey            string        `hcl:"yandex_key" env:"YANDEX_KEY"`
 }
 
 var (
