@@ -115,6 +115,6 @@ type dbArticle struct {
 	Link           string         `db:"a_link"`
 	Summary        sql.NullString `db:"a_summary"`
 	PublishedAt    time.Time      `db:"a_published_at"`
-	PostedAt       time.Time      `db:"a_posted_at"`
+	PostedAt       sql.NullTime   `db:"a_posted_at"`
 	CreatedAt      time.Time      `db:"a_created_at"`
 }
