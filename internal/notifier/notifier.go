@@ -17,7 +17,7 @@ import (
 )
 
 type ArticleProvider interface {
-	AllNotPosted(ctx context.Context, since time.Time, limit uint64) ([]model.Article, error)
+	AllNotPosted(ctx context.Context, limit uint64) ([]model.Article, error)
 	MarkPosted(ctx context.Context, article model.Article) error
 }
 
@@ -73,7 +73,7 @@ func (n *Notifier) Start(ctx context.Context) error {
 }
 
 func (n *Notifier) SelectAndSendArticle(ctx context.Context) error {
-	topOneArticles, err := n.articles.AllNotPosted(ctx, time.Now().Add(-n.lookupTimeWindow), 1)
+	topOneArticles, err := n.articles.AllNotPosted(ctx, 1)
 	if err != nil {
 		return err
 	}

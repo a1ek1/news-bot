@@ -43,7 +43,7 @@ func (s *ArticlePostgresStorage) Store(ctx context.Context, article model.Articl
 	return nil
 }
 
-func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, since time.Time, limit uint64) ([]model.Article, error) {
+func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, limit uint64) ([]model.Article, error) {
 	conn, err := s.db.Connx(ctx)
 	if err != nil {
 		return nil, err
@@ -52,26 +52,26 @@ func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, since time.Ti
 
 	var articles []dbArticle
 
-	if err := conn.SelectContext(
-		ctx,
-		&articles,
-		`SELECT 
-				a.id AS a_id, 
-				s.priority AS s_priority,
-				s.id AS s_id,
-				a.title AS a_title,
-				a.link AS a_link,
-				a.summary AS a_summary,
-				a.published_at AS a_published_at,
-				a.posted_at AS a_posted_at,
-				a.created_at AS a_created_at
-			FROM articles a JOIN sources s ON s.id = a.source_id
-			WHERE a.posted_at IS NULL 
-				AND a.published_at >= $1::timestamp
-			ORDER BY a.created_at DESC, s_priority DESC LIMIT $2;`,
-		since.UTC().Format(time.RFC3339),
-		limit,
-	); err != nil {
+	// Обновляем запрос: убираем фильтрацию по времени
+	query := `
+		SELECT 
+			a.id AS a_id, 
+			s.priority AS s_priority,
+			s.id AS s_id,
+			a.title AS a_title,
+			a.link AS a_link,
+			a.summary AS a_summary,
+			a.published_at AS a_published_at,
+			a.posted_at AS a_posted_at,
+			a.created_at AS a_created_at
+		FROM articles a 
+		JOIN sources s ON s.id = a.source_id
+		WHERE a.posted_at IS NULL
+		ORDER BY a.created_at DESC, s_priority DESC 
+		LIMIT $1;
+	`
+
+	if err := conn.SelectContext(ctx, &articles, query, limit); err != nil {
 		return nil, err
 	}
 
