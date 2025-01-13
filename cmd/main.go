@@ -7,11 +7,13 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
+	"news-bot/internal/bot"
 	"news-bot/internal/config"
 	"news-bot/internal/fetcher"
 	"news-bot/internal/notifier"
 	"news-bot/internal/storage"
 	"news-bot/internal/summary"
+	"news-bot/internal/utils"
 	"os"
 	"os/signal"
 	"syscall"
@@ -58,8 +60,8 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	//newsBot := utils.New(botAPI)
-	//newsBot.RegisterCmdView("start", bot.ViewCmdStart())
+	newsBot := utils.New(botAPI)
+	newsBot.RegisterCmdView("start", bot.ViewCmdStart())
 
 	go func(ctx context.Context) {
 		if err := fetcher.Start(ctx); err != nil {
@@ -72,23 +74,23 @@ func main() {
 		}
 	}(ctx)
 
-	//go func(ctx context.Context) {
-	if err := notifier.Start(ctx); err != nil {
+	go func(ctx context.Context) {
+		if err := notifier.Start(ctx); err != nil {
+			if !errors.Is(err, context.Canceled) {
+				log.Printf("[ERROR] failed to run notifier: %v", err)
+				return
+			}
+
+			log.Printf("[INFO] notifier stopped")
+		}
+	}(ctx)
+
+	if err := newsBot.Run(ctx); err != nil {
 		if !errors.Is(err, context.Canceled) {
-			log.Printf("[ERROR] failed to run notifier: %v", err)
+			log.Printf("[ERROR] failed to run bot: %v", err)
 			return
 		}
 
-		log.Printf("[INFO] notifier stopped")
+		log.Printf("[INFO] bot stopped")
 	}
-	//}(ctx)
-
-	//if err := newsBot.Run(ctx); err != nil {
-	//	if !errors.Is(err, context.Canceled) {
-	//		log.Printf("[ERROR] failed to run bot: %v", err)
-	//		return
-	//	}
-	//
-	//	log.Printf("[INFO] bot stopped")
-	//}
 }
